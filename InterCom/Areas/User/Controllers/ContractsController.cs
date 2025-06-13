@@ -4,6 +4,7 @@ using InterComInfrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,12 +36,12 @@ namespace InterCom.Areas.User.Controllers
         }
 
         // GET: User/Contracts
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var userId = _userMgr.GetUserId(User);
-            var contracts = _db.Contracts
-                               .Where(c => c.UserId == userId)
-                               .ToList();
+            var contracts = await _db.Contracts
+                                     .Where(c => c.UserId == userId)
+                                     .ToListAsync();
             return View(contracts);
         }
 
@@ -51,11 +52,16 @@ namespace InterCom.Areas.User.Controllers
             var tpl = await _db.Templates.FindAsync(templateId);
             if (tpl == null) return NotFound();
 
-            // Витягуємо всі ключі {{Key}} із HTML
-            var keys = Regex
-                .Matches(tpl.HtmlContent, "{{(.*?)}}")
-                .Select(m => m.Groups[1].Value)
-                .Distinct();
+            // Витягуємо всі ключі з таблиці плейсхолдерів
+            var allDbKeys = await _db.Placeholders
+                                     .Select(p => p.Key)
+                                     .ToListAsync();
+
+            // Зіставляємо з тим, що реально є в HTML
+            var htmlKeys = Regex.Matches(tpl.HtmlContent, "{{(.*?)}}")
+                                .Select(m => m.Groups[1].Value)
+                                .Distinct();
+            var keys = htmlKeys.Intersect(allDbKeys).ToList();
 
             ViewBag.HtmlTemplate = tpl.HtmlContent;
             ViewBag.PlaceholderKeys = keys;
@@ -65,20 +71,22 @@ namespace InterCom.Areas.User.Controllers
         }
 
         // POST: User/Contracts/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(int templateId, Dictionary<string, string> form)
         {
             var tpl = await _db.Templates.FindAsync(templateId);
             if (tpl == null) return NotFound();
 
-            // Збираємо ключі з шаблону
-            var keys = Regex
-                .Matches(tpl.HtmlContent, "{{(.*?)}}")
-                .Select(m => m.Groups[1].Value)
-                .Distinct();
+            // Отримуємо ті ж ключі, що в GET
+            var allDbKeys = await _db.Placeholders
+                                     .Select(p => p.Key)
+                                     .ToListAsync();
+            var htmlKeys = Regex.Matches(tpl.HtmlContent, "{{(.*?)}}")
+                                .Select(m => m.Groups[1].Value)
+                                .Distinct();
+            var keys = htmlKeys.Intersect(allDbKeys).ToList();
 
-            // Формуємо словник значень із всіх плейсхолдерів
+            // Формуємо словник значень по ключах із бази
             var values = keys.ToDictionary(
                 k => k,
                 k => form.ContainsKey(k) ? form[k] : string.Empty
@@ -86,7 +94,6 @@ namespace InterCom.Areas.User.Controllers
 
             var userId = _userMgr.GetUserId(User);
 
-            // Створюємо запис у БД
             var contract = new Contract
             {
                 TemplateId = templateId,
@@ -101,25 +108,22 @@ namespace InterCom.Areas.User.Controllers
             // Підставляємо значення в HTML
             var html = tpl.HtmlContent;
             foreach (var kv in values)
-            {
                 html = html.Replace($"{{{{{kv.Key}}}}}", kv.Value);
-            }
 
             // Генеруємо PDF
             var pdfBytes = _pdfService.GeneratePdf(html);
 
-            // Відправляємо на email, взятий із плейсхолдера ClientEmail
+            // Надсилаємо на email із ClientEmail
             if (values.TryGetValue("ClientEmail", out var toEmail)
                 && !string.IsNullOrWhiteSpace(toEmail))
             {
-                var subject = $"Договір #{contract.Id} від InterCom";
-                var bodyHtml = "<p>Доброго дня!</p><p>Ваш договір у вкладенні.</p>";
                 await _emailService.SendAsync(
                     toEmail,
-                    subject,
-                    bodyHtml,
+                    $"Договір #{contract.Id} від InterCom",
+                    "<p>Доброго дня!</p><p>Ваш договір у вкладенні.</p>",
                     pdfBytes,
-                    $"Contract_{contract.Id}.pdf");
+                    $"Contract_{contract.Id}.pdf"
+                );
             }
 
             return RedirectToAction(nameof(Index));
@@ -159,7 +163,6 @@ namespace InterCom.Areas.User.Controllers
 
             var pdfBytes = _pdfService.GeneratePdf(html);
             var fileName = $"Contract_{contract.Id}.pdf";
-
             return File(pdfBytes, "application/pdf", fileName);
         }
     }

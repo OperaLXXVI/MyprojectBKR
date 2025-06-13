@@ -21,4 +21,14 @@
 		<!-- Для відправки пошти -->
 		<PackageReference Include="MailKit" Version="4.12.1" />
 	</ItemGroup>
+
+	<!-- Окремий ItemGroup для копіювання нативних бібліотек -->
+	<ItemGroup>
+		<None Include="runtimes\win-x64\native\libwkhtmltox.dll">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Include="runtimes\win-x64\native\wkhtmltopdf.exe">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 </Project>
