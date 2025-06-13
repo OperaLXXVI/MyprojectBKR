@@ -1,0 +1,48 @@
+﻿@model IEnumerable<InterComCore.Entities.Template>
+
+@{
+    ViewData["Title"] = "Шаблони договорів";
+    Layout = "_Layout";
+}
+
+<h2 class="mb-4">@ViewData["Title"]</h2>
+
+<div class="row g-4">
+    @foreach (var tpl in Model)
+    {
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">@tpl.Name</h5>
+
+                    <div class="card-text preview-text mb-3">
+                        @* Виводимо HTML-прев’ю *@
+                        @Html.Raw(tpl.HtmlContent)
+                    </div>
+
+                    <a asp-area="User"
+                       asp-controller="Contracts"
+                       asp-action="Create"
+                       asp-route-templateId="@tpl.Id"
+                       class="btn btn-primary mt-auto">
+                        Заповнити договір
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Styles {
+    <style>
+        /* Обмежуємо висоту прев’ю та додаємо скрол, якщо тексту забагато */
+        .preview-text {
+            max-height: 8rem;
+            overflow: hidden;
+        }
+
+            .preview-text p {
+                margin-bottom: 0.5rem;
+            }
+    </style>
+}

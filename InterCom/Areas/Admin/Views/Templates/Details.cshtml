@@ -1,0 +1,41 @@
+﻿@model InterComCore.Entities.Template
+
+@{
+    ViewData["Title"] = $"Перегляд шаблону — {Model.Name}";
+    Layout = "_Layout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>@ViewData["Title"]</h2>
+    <a asp-area="Admin"
+       asp-controller="Templates"
+       asp-action="Index"
+       class="btn btn-secondary">
+        ← Назад до списку
+    </a>
+</div>
+
+<div class="card shadow-sm mb-5">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">@Model.Name</h5>
+    </div>
+    <div class="card-body">
+        <div class="template-preview">
+            @Html.Raw(Model.HtmlContent)
+        </div>
+    </div>
+</div>
+
+    <style>
+        /* щоб HTML із вашого шаблону красиво переносився і не ламав верстку */
+        .template-preview {
+          white-space: pre-wrap;      /* перенос рядків за необхідністю */
+          word-wrap: break-word;      /* перенос довгих слів */
+          font-family: inherit;       /* унаследовать шрифт з layout */
+          color: #212529;             /* стандартний текст Bootstrap */
+        }
+        .template-preview p {
+          margin-bottom: 1rem;        /* відступи між абзацами */
+        }
+    </style>
+

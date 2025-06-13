@@ -1,0 +1,29 @@
+﻿@model InterComCore.Entities.Contract
+@{
+    ViewData["Title"] = "Деталі договору";
+    Layout = "_Layout";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        @Html.Raw(ViewBag.RenderedHtml)
+    </div>
+</div>
+
+<div class="mb-3">
+    <a class="btn btn-outline-primary"
+       asp-area="User"
+       asp-controller="Contracts"
+       asp-action="Download"
+       asp-route-id="@Model.Id">
+        Завантажити PDF
+    </a>
+    <a class="btn btn-secondary"
+       asp-area="User"
+       asp-controller="Contracts"
+       asp-action="Index">
+        Назад
+    </a>
+</div>

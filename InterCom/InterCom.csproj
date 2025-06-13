@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- Підключаємо домен та інфраструктуру -->
+		<ProjectReference Include="..\InterComCore\InterComCore.csproj" />
+		<ProjectReference Include="..\InterComInfrastructure\InterComInfrastructure.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- Identity та підтримка генерації/міграцій EF -->
+		<PackageReference Include="DinkToPdf" Version="1.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<!-- Для відправки пошти -->
+		<PackageReference Include="MailKit" Version="4.12.1" />
+	</ItemGroup>
+</Project>

@@ -1,0 +1,42 @@
+﻿@model InterComCore.Entities.Placeholder
+@{
+    var isNew = Model.Id == 0;
+    ViewData["Title"] = isNew ? "Додати ключ" : "Редагувати ключ";
+    Layout = "_Layout";
+}
+<div class="card shadow-sm">
+    <div class="card-header @(isNew ? "bg-success" : "bg-warning") text-white">
+        <h3 class="mb-0">@ViewData["Title"]</h3>
+    </div>
+    <div class="card-body">
+        <form asp-area="Admin" asp-controller="Placeholders"
+              asp-action="@(isNew ? "Create" : "Edit")"
+              method="post">
+            @if (!isNew)
+            {
+                <input type="hidden" asp-for="Id" />
+            }
+            <div class="mb-3">
+                <label asp-for="Key" class="form-label">Key</label>
+                <input asp-for="Key" class="form-control" />
+                <span asp-validation-for="Key" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label">Description</label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <button type="submit"
+                    class="btn @(isNew ? "btn-success" : "btn-primary")">
+                @(isNew ? "Додати" : "Зберегти")
+            </button>
+            <a asp-action="Index" class="btn btn-secondary ms-2">Назад</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

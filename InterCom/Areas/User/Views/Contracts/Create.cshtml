@@ -1,0 +1,46 @@
+﻿@model InterComCore.Entities.Contract
+@{
+    ViewData["Title"] = "Створення договору";
+    Layout = "_Layout";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-area="User"
+      asp-controller="Contracts"
+      asp-action="Create"
+      method="post">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" name="templateId" value="@ViewBag.TemplateId" />
+
+    <div class="row">
+        @foreach (var key in (IEnumerable<string>)ViewBag.PlaceholderKeys)
+        {
+            <div class="col-md-6 mb-3">
+                <label class="form-label">@key</label>
+                <input name="@key" class="form-control" required />
+            </div>
+        }
+    </div>
+
+    -   <div class="mb-3">
+        -     <label class="form-label">Email </label>
+        -     <input name="Email" type="email" class="form-control" required />
+        -
+    </div>
+
+    <button type="submit" class="btn btn-primary">Зберегти договір</button>
+    <a asp-area="User"
+       asp-controller="Dashboard"
+       asp-action="Index"
+       class="btn btn-secondary ms-2">
+        Назад
+    </a>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

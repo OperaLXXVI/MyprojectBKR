@@ -1,0 +1,65 @@
+﻿@model IEnumerable<InterComCore.Entities.Template>
+@{
+    ViewData["Title"] = "Шаблони договорів";
+    Layout = "_Layout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>@ViewData["Title"]</h2>
+    <div>
+        <a class="btn btn-success me-2"
+           asp-area="Admin"
+           asp-controller="Templates"
+           asp-action="Create">
+            + Додати шаблон
+        </a>
+        <a class="btn btn-outline-primary"
+           asp-area="Admin"
+           asp-controller="Placeholders"
+           asp-action="Index">
+            Плейсхолдери
+        </a>
+    </div>
+</div>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>Id</th>
+            <th>Назва</th>
+            <th>Дії</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var tpl in Model)
+        {
+            <tr>
+                <td>@tpl.Id</td>
+                <td>@tpl.Name</td>
+                <td>
+                    <a class="btn btn-sm btn-info me-1"
+                       asp-area="Admin"
+                       asp-controller="Templates"
+                       asp-action="Details"
+                       asp-route-id="@tpl.Id">
+                        Переглянути
+                    </a>
+                    <a class="btn btn-sm btn-primary me-1"
+                       asp-area="Admin"
+                       asp-controller="Templates"
+                       asp-action="Edit"
+                       asp-route-id="@tpl.Id">
+                        Редагувати
+                    </a>
+                    <a class="btn btn-sm btn-danger"
+                       asp-area="Admin"
+                       asp-controller="Templates"
+                       asp-action="Delete"
+                       asp-route-id="@tpl.Id">
+                        Видалити
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
