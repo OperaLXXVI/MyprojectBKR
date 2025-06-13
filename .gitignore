@@ -1,0 +1,23 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build output
+bin/
+obj/
+
+# Rider
+.idea/
+
+# Visual Studio code workspace
+*.code-workspace
+
+# npm / node
+node_modules/
+
+# OS
+Thumbs.db
+Desktop.ini
