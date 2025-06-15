@@ -1,0 +1,58 @@
+﻿@model InterCom.ViewModels.EditAccountViewModel
+@{
+    ViewData["Title"] = "Редагування акаунту";
+    Layout = "_Layout";
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-warning text-dark">
+        <h3 class="mb-0">@ViewData["Title"]</h3>
+    </div>
+    <div class="card-body">
+        <form asp-area="Admin"
+              asp-controller="Accounts"
+              asp-action="Edit"
+              method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <div class="mb-3">
+                <label asp-for="Username" class="form-label"></label>
+                <input asp-for="Username" class="form-control" />
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Role" class="form-label"></label>
+                <select asp-for="Role" asp-items="Model.RoleList" class="form-select"></select>
+                <span asp-validation-for="Role" class="text-danger"></span>
+            </div>
+
+            <hr />
+
+            <h5>Зміна паролю</h5>
+            <div class="mb-3">
+                <label asp-for="NewPassword" class="form-label"></label>
+                <input asp-for="NewPassword" class="form-control" />
+                <span asp-validation-for="NewPassword" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ConfirmPassword" class="form-label"></label>
+                <input asp-for="ConfirmPassword" class="form-control" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Зберегти</button>
+            <a asp-area="Admin"
+               asp-controller="Accounts"
+               asp-action="Index"
+               class="btn btn-secondary ms-2">
+                Назад
+            </a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

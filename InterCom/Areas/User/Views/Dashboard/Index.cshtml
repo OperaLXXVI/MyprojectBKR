@@ -1,4 +1,4 @@
-﻿@model IEnumerable<InterComCore.Entities.Template>
+﻿@model IEnumerable<InterCom.ViewModels.TemplateViewModel>
 
 @{
     ViewData["Title"] = "Шаблони договорів";
@@ -15,10 +15,16 @@
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">@tpl.Name</h5>
 
-                    <div class="card-text preview-text mb-3">
-                        @* Виводимо HTML-прев’ю *@
-                        @Html.Raw(tpl.HtmlContent)
-                    </div>
+                    <ul class="list-unstyled text-muted small mb-3">
+                        <li>
+                            <strong>Створив:</strong>
+                            @tpl.CreatedByUserName
+                        </li>
+                        <li>
+                            <strong>Дата:</strong>
+                            @tpl.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                        </li>
+                    </ul>
 
                     <a asp-area="User"
                        asp-controller="Contracts"
@@ -32,17 +38,3 @@
         </div>
     }
 </div>
-
-@section Styles {
-    <style>
-        /* Обмежуємо висоту прев’ю та додаємо скрол, якщо тексту забагато */
-        .preview-text {
-            max-height: 8rem;
-            overflow: hidden;
-        }
-
-            .preview-text p {
-                margin-bottom: 0.5rem;
-            }
-    </style>
-}

@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace InterComCore.Entities
 {
     public class Template
     {
         public int Id { get; set; }
-        public string Name { get; set; }               // Назва шаблона (наприклад «Договір інтернет»)
-        public string HtmlContent { get; set; }        // HTML-шаблон з плейсхолдерами
+        public string Name { get; set; } = "";
+        public string HtmlContent { get; set; } = "";
 
-        // Пізніше тут можна додати навігаційні властивості до Placeholder
-        // public ICollection<Placeholder> Placeholders { get; set; }
+        // добавляем эти два свойства
+        public DateTime CreatedAt { get; set; }
+        public string CreatedBy { get; set; } = "";
     }
 }

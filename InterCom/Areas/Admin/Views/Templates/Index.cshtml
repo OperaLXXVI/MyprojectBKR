@@ -51,13 +51,19 @@
                        asp-route-id="@tpl.Id">
                         Редагувати
                     </a>
-                    <a class="btn btn-sm btn-danger"
-                       asp-area="Admin"
-                       asp-controller="Templates"
-                       asp-action="Delete"
-                       asp-route-id="@tpl.Id">
-                        Видалити
-                    </a>
+                    @* Замість <a> на Delete робимо форму POST *@
+                    <form asp-area="Admin"
+                          asp-controller="Templates"
+                          asp-action="Delete"
+                          asp-route-id="@tpl.Id"
+                          method="post"
+                          class="d-inline"
+                          onsubmit="return confirm('Видалити цей шаблон?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            Видалити
+                        </button>
+                    </form>
                 </td>
             </tr>
         }

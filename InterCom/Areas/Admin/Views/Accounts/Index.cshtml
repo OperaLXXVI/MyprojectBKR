@@ -40,13 +40,20 @@
                        asp-route-id="@u.Id">
                         Редагувати
                     </a>
-                    <a class="btn btn-sm btn-outline-danger"
-                       asp-area="Admin"
-                       asp-controller="Accounts"
-                       asp-action="Delete"
-                       asp-route-id="@u.Id">
-                        Видалити
-                    </a>
+
+                    <form asp-area="Admin"
+                          asp-controller="Accounts"
+                          asp-action="Delete"
+                          asp-route-id="@u.Id"
+                          method="post"
+                          class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit"
+                                class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Дійсно видалити цього користувача?');">
+                            Видалити
+                        </button>
+                    </form>
                 </td>
             </tr>
         }

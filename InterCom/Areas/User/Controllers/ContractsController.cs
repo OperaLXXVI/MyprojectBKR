@@ -40,7 +40,9 @@ namespace InterCom.Areas.User.Controllers
         {
             var userId = _userMgr.GetUserId(User);
             var contracts = await _db.Contracts
+                                     .Include(c => c.Template)      // <-- підвантажуємо назву шаблону
                                      .Where(c => c.UserId == userId)
+                                     .OrderByDescending(c => c.CreatedAt)
                                      .ToListAsync();
             return View(contracts);
         }
@@ -52,12 +54,12 @@ namespace InterCom.Areas.User.Controllers
             var tpl = await _db.Templates.FindAsync(templateId);
             if (tpl == null) return NotFound();
 
-            // Витягуємо всі ключі з таблиці плейсхолдерів
+            // всі ключі з БД
             var allDbKeys = await _db.Placeholders
                                      .Select(p => p.Key)
                                      .ToListAsync();
 
-            // Зіставляємо з тим, що реально є в HTML
+            // ключі з HTML, що є в БД
             var htmlKeys = Regex.Matches(tpl.HtmlContent, "{{(.*?)}}")
                                 .Select(m => m.Groups[1].Value)
                                 .Distinct();
@@ -77,7 +79,7 @@ namespace InterCom.Areas.User.Controllers
             var tpl = await _db.Templates.FindAsync(templateId);
             if (tpl == null) return NotFound();
 
-            // Отримуємо ті ж ключі, що в GET
+            // повторюємо пошук ключів у HTML і БД
             var allDbKeys = await _db.Placeholders
                                      .Select(p => p.Key)
                                      .ToListAsync();
@@ -86,7 +88,7 @@ namespace InterCom.Areas.User.Controllers
                                 .Distinct();
             var keys = htmlKeys.Intersect(allDbKeys).ToList();
 
-            // Формуємо словник значень по ключах із бази
+            // формуємо словник значень
             var values = keys.ToDictionary(
                 k => k,
                 k => form.ContainsKey(k) ? form[k] : string.Empty
@@ -105,15 +107,13 @@ namespace InterCom.Areas.User.Controllers
             _db.Contracts.Add(contract);
             await _db.SaveChangesAsync();
 
-            // Підставляємо значення в HTML
+            // підставляємо й генеруємо PDF
             var html = tpl.HtmlContent;
             foreach (var kv in values)
                 html = html.Replace($"{{{{{kv.Key}}}}}", kv.Value);
-
-            // Генеруємо PDF
             var pdfBytes = _pdfService.GeneratePdf(html);
 
-            // Надсилаємо на email із ClientEmail
+            // надсилаємо на ClientEmail
             if (values.TryGetValue("ClientEmail", out var toEmail)
                 && !string.IsNullOrWhiteSpace(toEmail))
             {
@@ -133,13 +133,13 @@ namespace InterCom.Areas.User.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
-            var contract = await _db.Contracts.FindAsync(id);
+            var contract = await _db.Contracts
+                                    .Include(c => c.Template)
+                                    .FirstOrDefaultAsync(c => c.Id == id);
             if (contract == null) return NotFound();
 
-            var tpl = await _db.Templates.FindAsync(contract.TemplateId);
             var values = contract.GetValues();
-
-            var html = tpl.HtmlContent;
+            var html = contract.Template.HtmlContent;
             foreach (var kv in values)
                 html = html.Replace($"{{{{{kv.Key}}}}}", kv.Value);
 
@@ -151,19 +151,18 @@ namespace InterCom.Areas.User.Controllers
         [HttpGet]
         public async Task<IActionResult> Download(int id)
         {
-            var contract = await _db.Contracts.FindAsync(id);
+            var contract = await _db.Contracts
+                                    .Include(c => c.Template)
+                                    .FirstOrDefaultAsync(c => c.Id == id);
             if (contract == null) return NotFound();
 
-            var tpl = await _db.Templates.FindAsync(contract.TemplateId);
             var values = contract.GetValues();
-
-            var html = tpl.HtmlContent;
+            var html = contract.Template.HtmlContent;
             foreach (var kv in values)
                 html = html.Replace($"{{{{{kv.Key}}}}}", kv.Value);
 
             var pdfBytes = _pdfService.GeneratePdf(html);
-            var fileName = $"Contract_{contract.Id}.pdf";
-            return File(pdfBytes, "application/pdf", fileName);
+            return File(pdfBytes, "application/pdf", $"Contract_{contract.Id}.pdf");
         }
     }
 }

@@ -1,9 +1,11 @@
-﻿using InterComCore.Entities;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using InterComCore.Entities;
 using InterComInfrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
 namespace InterCom.Areas.Admin.Controllers
 {
@@ -16,27 +18,36 @@ namespace InterCom.Areas.Admin.Controllers
 
         // GET: Admin/Templates
         public async Task<IActionResult> Index()
-            => View(await _db.Templates.ToListAsync());
+        {
+            var list = await _db.Templates
+                                .AsNoTracking()
+                                .ToListAsync();
+            return View(list);
+        }
 
         // GET: Admin/Templates/Details/5
         public async Task<IActionResult> Details(int id)
         {
-            var tpl = await _db.Templates.FindAsync(id);
+            var tpl = await _db.Templates
+                               .AsNoTracking()
+                               .FirstOrDefaultAsync(t => t.Id == id);
             if (tpl == null) return NotFound();
+
             return View(tpl);
         }
 
         // GET: Admin/Templates/Create
-        public IActionResult Create()
-            => View();
+        public IActionResult Create() => View(new Template());
 
         // POST: Admin/Templates/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Template template)
         {
             if (!ModelState.IsValid)
                 return View(template);
+
+            template.CreatedAt = DateTime.UtcNow;
+            template.CreatedBy = User.Identity?.Name ?? "—";
 
             _db.Templates.Add(template);
             await _db.SaveChangesAsync();
@@ -52,8 +63,7 @@ namespace InterCom.Areas.Admin.Controllers
         }
 
         // POST: Admin/Templates/Edit
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Template template)
         {
             if (!ModelState.IsValid)
@@ -64,7 +74,8 @@ namespace InterCom.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Admin/Templates/Delete/5
+        // POST: Admin/Templates/Delete/5
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             var tpl = await _db.Templates.FindAsync(id);

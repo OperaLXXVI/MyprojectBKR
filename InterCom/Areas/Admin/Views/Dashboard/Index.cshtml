@@ -1,4 +1,7 @@
 ﻿@model IEnumerable<InterComCore.Entities.Contract>
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<IdentityUser> UserManager
+
 @{
     ViewData["Title"] = "Усі контракти";
     Layout = "_Layout";
@@ -26,18 +29,22 @@
                 <tbody>
                     @foreach (var c in Model)
                     {
+                        // витягуємо плейсхолдерні значення
                         var vals = c.GetValues();
+                        // знаходимо користувача
+                        var user = await UserManager.FindByIdAsync(c.UserId);
+                        var userName = user?.UserName ?? "—";
                         <tr>
                             <td>@c.Template.Name</td>
                             <td>@(vals.TryGetValue("ContractNumber", out var num) ? num : "-")</td>
                             <td>@(vals.TryGetValue("ClientAddress", out var addr) ? addr : "-")</td>
                             <td>@(vals.TryGetValue("ClientName", out var nm) ? nm : "-")</td>
                             <td>@(vals.TryGetValue("ClientPhone", out var ph) ? ph : "-")</td>
-                            <td>@c.UserId</td>
+                            <td>@userName</td>
                             <td>@c.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    @* Переглянути *@
+                                    <!-- Переглянути -->
                                     <a asp-area="Admin"
                                        asp-controller="Dashboard"
                                        asp-action="Details"
@@ -46,7 +53,7 @@
                                         Переглянути
                                     </a>
 
-                                    @* Видалити *@
+                                    <!-- Видалити -->
                                     <form asp-area="Admin"
                                           asp-controller="Dashboard"
                                           asp-action="Delete"
@@ -61,7 +68,7 @@
                                         </button>
                                     </form>
 
-                                    @* Завантажити PDF *@
+                                    <!-- Завантажити PDF -->
                                     <a asp-area="User"
                                        asp-controller="Contracts"
                                        asp-action="Download"
